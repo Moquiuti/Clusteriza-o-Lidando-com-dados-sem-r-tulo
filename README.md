@@ -1,10 +1,11 @@
 # Clusterização: Lidando com dados sem rótulo
 
-Este repositório reúne a evolução prática do curso de clusterização, organizado em **três atividades complementares**:
+Este repositório reúne a evolução prática do curso de clusterização, organizado em **quatro atividades complementares**:
 
 1. **Atividade 1 - Pipeline base com KMeans**
 2. **Atividade 2 - Avaliação de métricas de clusterização**
 3. **Atividade 3 - Otimização do resultado dos agrupamentos**
+4. **Atividade 4 - Desvendando os agrupamentos**
 
 ## Visão geral das atividades
 
@@ -59,6 +60,27 @@ Este repositório reúne a evolução prática do curso de clusterização, orga
 - treinamento final com `KMeans(n_clusters=3)`;
 - salvamento do modelo e da base final clusterizada.
 
+### Atividade 4 - Desvendando os agrupamentos
+
+**Objetivo**: interpretar os clusters gerados pelo KMeans e identificar os perfis predominantes de cada grupo.
+
+**Arquivos**:
+- `atividade_desvendando_agrupamentos.ipynb`
+- `atividade_desvendando_agrupamentos.py`
+
+**Práticas aplicadas**:
+- carregamento da base e preparação dos dados;
+- One-Hot Encoding na coluna `sexo`;
+- escalonamento com `MinMaxScaler`;
+- treinamento do KMeans com 3 clusters;
+- reversão da escala com `inverse_transform`;
+- criação de `DataFrame` para análise em escala original;
+- inclusão da coluna `cluster`;
+- cálculo das médias por cluster;
+- transposição e ordenação dos atributos mais relevantes;
+- interpretação dos perfis de cada agrupamento;
+- salvamento dos artefatos com `joblib`.
+
 ## Conceitos trabalhados
 
 ### One-Hot Encoding
@@ -80,6 +102,14 @@ Avalia a separação entre clusters e a coesão interna dos grupos:
 
 Padroniza os atributos para o intervalo `[0, 1]`, reduzindo o impacto de variáveis com escalas maiores em algoritmos baseados em distância, como KMeans.
 
+### Reversão da escala
+
+Após o treinamento com dados escalados, o `inverse_transform` é usado para retornar os valores à escala original, facilitando a interpretação humana dos resultados.
+
+### Análise por cluster
+
+Com os rótulos dos clusters adicionados à base, `groupby('cluster').mean()` permite identificar quais atributos se destacam em cada grupo e apoiar decisões de negócio.
+
 ## Dependências
 
 As dependências necessárias para todas as atividades estão em `requirements.txt`.
@@ -93,6 +123,7 @@ pip install -r requirements.txt
 python atividade_clusterizacao.py
 python atividade_metricas_clusterizacao.py
 python atividade_otimizacao_clusterizacao.py
+python atividade_desvendando_agrupamentos.py
 ```
 
 ### Notebooks
@@ -102,6 +133,7 @@ pip install -r requirements.txt
 jupyter notebook atividade_clusterizacao.ipynb
 jupyter notebook atividade_metricas_clusterizacao.ipynb
 jupyter notebook atividade_otimizacao_clusterizacao.ipynb
+jupyter notebook atividade_desvendando_agrupamentos.ipynb
 ```
 
 ## Artefatos gerados
@@ -114,17 +146,27 @@ Dependendo da atividade executada, os seguintes arquivos podem ser gerados ou at
 - `kmeans.pkl`
 - `dados_clusterizados.csv`
 - `dados_clusterizados_escalados.csv`
+- `dados_analise_clusterizados.csv`
+- `medias_por_cluster.csv`
 
-## Texto para entrega - Atividade 3
+## Interpretação esperada dos grupos (Atividade 4)
 
-Nesta atividade, dei continuidade ao fluxo de clusterização buscando otimizar o resultado dos agrupamentos gerados pelo modelo KMeans. Depois de preparar os dados e aplicar a codificação One-Hot Encoding na coluna categórica `sexo`, utilizei o método `describe()` para observar as estatísticas resumidas da base e entender melhor a distribuição dos valores.
+Com base nas médias dos atributos por cluster, uma interpretação inicial dos perfis pode ser:
 
-Em seguida, apliquei o `MinMaxScaler` para escalar os dados em um intervalo entre 0 e 1. Essa etapa é importante porque o KMeans é um algoritmo baseado em distância, então colunas com valores em escalas maiores podem influenciar mais o agrupamento do que deveriam. Ao escalar os dados, todas as variáveis passam a contribuir de maneira mais equilibrada para o cálculo das distâncias.
+- **Grupo 0**: público jovem com maior interesse em moda, música e aparência;
+- **Grupo 1**: público mais associado a esportes (especialmente futebol americano e basquete) e interesses culturais como banda e rock;
+- **Grupo 2**: público mais equilibrado, com interesses em música, dança e moda.
 
-Após o escalonamento, converti os dados novamente para um `DataFrame` pandas, preservando os nomes das colunas originais para facilitar a análise. Também salvei o scaler treinado com `joblib`, permitindo reutilizar a mesma transformação em novos dados.
+## Texto para entrega - Atividade 4
 
-Com os dados escalados, executei novamente a avaliação para calcular inércia e Silhouette Score para diferentes quantidades de clusters, variando de 2 até 20. A partir dessa análise, utilizei o gráfico de silhueta e o método do cotovelo para apoiar a escolha da quantidade mais adequada de grupos.
+Nesta atividade, dei continuidade ao fluxo de clusterização com foco na interpretação dos agrupamentos criados pelo modelo KMeans. Depois de preparar os dados, aplicar One-Hot Encoding, escalar as variáveis com MinMaxScaler e treinar o modelo com 3 clusters, o objetivo passou a ser entender o perfil de cada grupo formado.
 
-Com base nos resultados observados, escolhi `k = 3` como configuração final. Por fim, treinei um novo modelo KMeans com 3 clusters usando os dados escalados, salvei o modelo em arquivo e gerei a base final com os agrupamentos.
+Como o modelo foi treinado com os dados escalados, o primeiro passo foi reverter a escala utilizando o `inverse_transform` do scaler previamente treinado. Essa etapa é importante porque os dados escalados entre 0 e 1 são úteis para o modelo, mas não são tão intuitivos para análise humana. Ao retornar os valores para a escala original, fica mais fácil interpretar as características reais de cada agrupamento.
 
-Essa etapa reforçou a importância do pré-processamento em problemas de aprendizado não supervisionado, especialmente quando utilizamos algoritmos sensíveis à escala das variáveis, como o KMeans.
+Em seguida, criei um novo `DataFrame` chamado `dados_analise`, contendo os dados revertidos para a escala original. Também adicionei a coluna `cluster`, utilizando os rótulos atribuídos pelo modelo KMeans. Com isso, foi possível agrupar os registros por cluster e calcular a média dos atributos de cada grupo.
+
+Depois, transpus a tabela de médias para facilitar a comparação entre os clusters e ordenei os atributos de cada grupo em ordem decrescente. Essa análise permitiu identificar quais características eram mais fortes em cada agrupamento.
+
+Com base nas médias analisadas, foi possível interpretar os três grupos principais: o grupo 0 apresentou um perfil mais jovem, com forte interesse em moda, música e aparência; o grupo 1 demonstrou maior associação com esportes, especialmente futebol americano, basquete e interesses culturais como banda e rock; já o grupo 2 apresentou um comportamento mais equilibrado, com interesses ligados a música, dança e moda.
+
+Essa etapa foi importante porque mostrou que a clusterização não termina no treinamento do modelo. Depois que os grupos são criados, é necessário interpretá-los para transformar os resultados em informação útil e apoiar decisões, como estratégias de marketing, personalização de conteúdo ou segmentação de usuários.

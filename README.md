@@ -1,11 +1,12 @@
 # Clusterização: Lidando com dados sem rótulo
 
-Este repositório reúne a evolução prática do curso de clusterização, organizado em **quatro atividades complementares**:
+Este repositório reúne a evolução prática do curso de clusterização, organizado em **cinco atividades complementares**:
 
 1. **Atividade 1 - Pipeline base com KMeans**
 2. **Atividade 2 - Avaliação de métricas de clusterização**
 3. **Atividade 3 - Otimização do resultado dos agrupamentos**
 4. **Atividade 4 - Desvendando os agrupamentos**
+5. **Atividade 5 - Aplicação web com Streamlit e deploy**
 
 ## Visão geral das atividades
 
@@ -81,6 +82,24 @@ Este repositório reúne a evolução prática do curso de clusterização, orga
 - interpretação dos perfis de cada agrupamento;
 - salvamento dos artefatos com `joblib`.
 
+### Atividade 5 - Aplicação web com Streamlit e deploy
+
+**Objetivo**: publicar a pipeline de clusterização em uma interface interativa, com upload de CSV, predição em lote e download do resultado.
+
+**Arquivos**:
+- `App.py`
+- `app_core.py`
+- `smoke_test_app.py`
+
+**Práticas aplicadas**:
+- separação entre camada de interface e camada de negócio;
+- carregamento dos artefatos com cache em `st.cache_resource`;
+- validação de estrutura e conteúdo do CSV;
+- tratamento de exceções com mensagens claras para o usuário;
+- exibição de preview, distribuição dos clusters e download do resultado;
+- geração de CSV modelo para facilitar o uso;
+- teste de fumaça local para validar o pipeline sem interface gráfica.
+
 ## Conceitos trabalhados
 
 ### One-Hot Encoding
@@ -124,6 +143,7 @@ python atividade_clusterizacao.py
 python atividade_metricas_clusterizacao.py
 python atividade_otimizacao_clusterizacao.py
 python atividade_desvendando_agrupamentos.py
+python smoke_test_app.py
 ```
 
 ### Notebooks
@@ -135,6 +155,94 @@ jupyter notebook atividade_metricas_clusterizacao.ipynb
 jupyter notebook atividade_otimizacao_clusterizacao.ipynb
 jupyter notebook atividade_desvendando_agrupamentos.ipynb
 ```
+
+### Aplicação Streamlit
+
+```bash
+pip install -r requirements.txt
+streamlit run App.py
+```
+
+Depois de iniciar, acesse `http://localhost:8501` no navegador.
+
+## Documentação da aplicação
+
+### Arquitetura
+
+- `App.py`: interface Streamlit, widgets e experiência do usuário.
+- `app_core.py`: pipeline de predição, validações e regras de negócio.
+- `smoke_test_app.py`: teste rápido para validar artefatos e inferência.
+
+Essa separação melhora manutenção, testes e evolução da aplicação.
+
+### Fluxo de processamento
+
+1. usuário envia um CSV na interface;
+2. aplicação valida colunas obrigatórias e valores de `sexo`;
+3. dados passam por One-Hot Encoding e escalonamento;
+4. modelo `kmeans.pkl` gera os clusters;
+5. resultado recebe `cluster` e `descricao_cluster`;
+6. usuário visualiza dados e baixa o CSV final.
+
+### Colunas esperadas no CSV de entrada
+
+- `sexo`
+- `idade`
+- `numero_de_amigos`
+- `basquete`
+- `futebol_americano`
+- `futebol`
+- `softbol`
+- `voleibol`
+- `natacao`
+- `animacao`
+- `beisebol`
+- `tenis`
+- `esportes`
+- `fofo`
+- `danca`
+- `banda`
+- `marcha`
+- `musica`
+- `rock`
+- `cabelo`
+- `vestido`
+- `shopping`
+- `compras`
+- `roupas`
+- `nossa_marca`
+- `marca_concorrente`
+- `bebidas`
+
+Valores aceitos para `sexo`: `F`, `M`, `NE`.
+
+### Tratamento de erros (plus de robustez)
+
+A aplicação implementa uma exceção específica (`AppDataError`) para cenários de entrada inválida, por exemplo:
+
+- ausência de colunas obrigatórias;
+- valores inválidos na coluna `sexo`;
+- campos numéricos vazios ou com texto.
+
+Com isso, o usuário recebe feedback objetivo e consegue corrigir o CSV rapidamente.
+
+### Teste de fumaça
+
+Para validar a pipeline sem abrir o navegador:
+
+```bash
+python smoke_test_app.py
+```
+
+Esse teste carrega os artefatos (`encoder.pkl`, `scaler.pkl`, `kmeans.pkl`), executa predição em amostra e confirma o formato da saída.
+
+### Deploy no Streamlit Community Cloud
+
+1. crie um repositório público no GitHub;
+2. envie `App.py`, `app_core.py`, `requirements.txt` e os `.pkl`;
+3. acesse `share.streamlit.io` e clique em **Create app**;
+4. selecione repositório, branch `main` e arquivo `App.py`;
+5. finalize em **Deploy** e compartilhe a URL `*.streamlit.app`.
 
 ## Artefatos gerados
 
